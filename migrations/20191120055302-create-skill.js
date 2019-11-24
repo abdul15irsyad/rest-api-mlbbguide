@@ -9,12 +9,15 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       nama_skill: {
+        allowNull: false,
         type: Sequelize.STRING
       },
       deskripsi: {
+        allowNull: false,
         type: Sequelize.STRING
       },
       gambar_skill: {
+        allowNull: true,
         type: Sequelize.STRING
       },
       createdAt: {

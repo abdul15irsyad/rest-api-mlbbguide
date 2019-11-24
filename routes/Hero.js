@@ -8,48 +8,42 @@ router.get('/', async (req,res,next)=>{
     var heroes = await model.Hero.findAll({
       attributes: [['id','id_hero'],'nama_hero','gambar_hero']
     });
-    if(heroes.length != 0){
+    if(heroes.length != 0){ // jika hero ada
       for await (var hero of heroes){
         var skills = await model.Skill.findAll({
           attributes: [['id','id_skill'],'nama_skill','deskripsi','gambar_skill'],
-          where: {
-            'heroId': hero.dataValues.id_hero
-          }
+          where:{heroId: hero.dataValues.id_hero}
         })
         var hero_role = await model.Hero_Role.findAll({
           attributes: [['roleId','id_role']],
-          where: {
-            'heroId': hero.dataValues.id_hero
-          }
+          where:{heroId: hero.dataValues.id_hero}
         });
         hero.dataValues.role = [];
         for await (var hr of hero_role){
           var role = await model.Role.findOne({
-            where: {
-              id: hr.dataValues.id_role
-            }
+            where: {id: hr.dataValues.id_role}
           });
           hero.dataValues.role.push(role.dataValues.role);
         }
         hero.dataValues.skills = skills;
       }
       res.status(200).json({
-        'status': true,
-        'message': 'get all heroes',
-        'data': heroes
+        status: true,
+        message: 'get all heroes',
+        data: heroes
       });
     }else{
-      res.status(204).json({
-        'status': true,
-        'message': 'no heroes',
-        'data': {}
+      res.status(400).json({
+        status: false,
+        message: 'there is no heroes',
+        data: {}
       });
     }
   }catch(err){
     res.status(400).json({
-      'status': false,
-      'message': err.message,
-      'data': {}
+      status: false,
+      message: err.message,
+      data: {}
     });
   }
 });
@@ -59,50 +53,42 @@ router.get('/:id', async (req,res,next)=>{
   try{
     var hero = await model.Hero.findOne({
       attributes: [['id','id_hero'],'nama_hero','gambar_hero'],
-      where:{
-        'id': req.params.id
-      }
+      where:{id: req.params.id}
     });
     if(hero){
       var skills = await model.Skill.findAll({
         attributes: [['id','id_skill'],'nama_skill','deskripsi','gambar_skill'],
-        where: {
-          'heroId': hero.dataValues.id_hero
-        }
+        where:{heroId: hero.dataValues.id_hero}
       })
       var hero_role = await model.Hero_Role.findAll({
         attributes: [['roleId','id_role']],
-        where: {
-          'heroId': hero.dataValues.id_hero
-        }
+        where: {heroId: hero.dataValues.id_hero}
       });
       hero.dataValues.role = [];
       for await (var hr of hero_role){
         var role = await model.Role.findOne({
-          where: {
-            id: hr.dataValues.id_role
-          }
+          where: {id: hr.dataValues.id_role}
         });
         hero.dataValues.role.push(role.dataValues.role);
       }
       hero.dataValues.skills = skills;
       res.status(200).json({
-        'status': true,
-        'message': 'get hero '+hero.dataValues.nama_hero+'',
-        'data': hero
+        status: true,
+        message: 'get hero '+hero.dataValues.nama_hero+'',
+        data: hero
       });
     }else{
       res.status(200).json({
-        'status': true,
-        'message': 'hero not found',
-        'data': {}
+        status: true,
+        message: 'hero not found',
+        data: {}
       });
     }
   }catch(err){
     res.status(400).json({
-      'status': false,
-      'message': err.message,
-      'data': {}
+      status: false,
+      message: err.message,
+      data: {}
     });
   }
 });
@@ -134,26 +120,26 @@ router.post('/', async (req,res,next)=>{
     }
     if(hero&&skills.length!=0&&roles.length!=0){
       res.status(201).json({
-        'status': true,
-        'message': 'success create hero',
-        'data': {
-          'id_hero': hero.dataValues.id,
-          'nama_hero': hero.dataValues.nama_hero,
-          'gambar_hero': hero.dataValues.gambar_hero
+        status: true,
+        message: 'success create hero',
+        data: {
+          id_hero: hero.dataValues.id,
+          nama_hero: hero.dataValues.nama_hero,
+          gambar_hero: hero.dataValues.gambar_hero
         }
       });
     }else{
       res.status(400).json({
-        'status': false,
-        'message': 'failed create hero',
-        'data': {}
+        status: false,
+        message: 'failed create hero',
+        data: {}
       });
     }
   }catch(err){
     res.status(400).json({
-      'status': false,
-      'message': err.message,
-      'data': {}
+      status: false,
+      message: err.message,
+      data: {}
     });
   }
 });
@@ -163,9 +149,7 @@ router.post('/:id/skill', async (req,res,next)=>{
   try{
     var hero = await model.Hero.findOne({
       attributes: ['id','nama_hero','gambar_hero'],
-      where:{
-        'id': req.params.id
-      }
+      where:{id: req.params.id}
     });
     if(hero){
       var skill = await model.Skill.create({
@@ -175,22 +159,22 @@ router.post('/:id/skill', async (req,res,next)=>{
         heroId: req.params.id
       });
       res.status(201).json({
-        'status': true,
-        'message': 'success add skill to '+hero.dataValues.nama_hero+'',
-        'data': {}
+        status: true,
+        message: 'success add skill to '+hero.dataValues.nama_hero+'',
+        data: {}
       });
     }else{
       res.status(400).json({
-        'status': false,
-        'message': 'hero not found',
-        'data': {}
+        status: false,
+        message: 'hero not found',
+        data: {}
       });
     }
   }catch(err){
     res.status(400).json({
-      'status': false,
-      'message': err.message,
-      'data': {}
+      status: false,
+      message: err.message,
+      data: {}
     });
   }
 });
@@ -199,36 +183,43 @@ router.post('/:id/skill', async (req,res,next)=>{
 router.patch('/:id', async (req,res,next)=>{
   try{
     var hero = await model.Hero.findOne({
-      where: {
-        id: req.params.id
-      }
+      where:{id: req.params.id}
     })
     if(hero){
       var updateHero = await model.Hero.update({
         nama_hero: req.body.nama_hero,
         gambar_hero: req.body.gambar_hero,
       },{
-        where: {
-          id: hero.dataValues.id
-        }
+        where: {id: hero.dataValues.id}
       });
+      if(req.body.role){
+        var deleteAllRole = await model.Hero_Role.destroy({
+          where: {heroId: hero.dataValues.id}
+        });
+        for await (var rb of req.body.role){
+          var hero_role = await model.Hero_Role.create({
+            heroId: hero.dataValues.id,
+            roleId: rb
+          });
+        }
+      }
       res.status(200).json({
-        'status': true,
-        'message': 'success update hero'+hero.dataValues.nama_hero+'',
-        'data': {}
+        status: true,
+        message: 'success update hero',
+        data: {}
       });
     }else{
       res.status(400).json({
-        'status': false,
-        'message': 'hero not found',
-        'data': {}
+        status: false,
+        message: 'hero not found',
+        data: {}
       });
     }
   }catch(err){
     res.status(400).json({
-      'status': false,
-      'message': err.message,
-      'data': {}
+      status: false,
+      message: err.message,
+      data: {}
     });
   }
 });
@@ -237,33 +228,29 @@ router.patch('/:id', async (req,res,next)=>{
 router.delete('/:id',async (req,res,next)=>{
   try{
     var hero = await model.Hero.findOne({
-      where: {
-        id: req.params.id
-      }
+      where: {id: req.params.id}
     });
     if(hero){
       var deleteHero = await model.Hero.destroy({
-        where: {
-          id: hero.dataValues.id
-        }
+        where: {id: hero.dataValues.id}
       });
       res.status(200).json({
-        'status': true,
-        'message': 'success delete hero '+hero.dataValues.nama_hero+'',
-        'data': {}
+        status: true,
+        message: 'success delete hero '+hero.dataValues.nama_hero+'',
+        data: {}
       });
     }else{
       res.status(400).json({
-        'status': false,
-        'message': 'hero not found',
-        'data': {}
+        status: false,
+        message: 'hero not found',
+        data: {}
       });
     }
   }catch(err){
     res.status(400).json({
-      'status': false,
-      'message': err.message,
-      'data': {}
+      status: false,
+      message: err.message,
+      data: {}
     });
   }
 });
